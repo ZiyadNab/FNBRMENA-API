@@ -38,6 +38,6 @@ readEndpoints('endpoints')
 EndpointsBase.listen(app, admin)
 authEvent(admin)
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
     console.log('FNBRMENA Api is online!')
 })
