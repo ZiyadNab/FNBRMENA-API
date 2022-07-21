@@ -47,9 +47,9 @@ module.exports = {
                 status: 400,
                 error: `The query parameter of authType ${req.query.authType} is not valid`,
                 validAuthTypes: [
-                    'eg1',
-                    'PC',
-                    'lac2',
+                    'EG1',
+                    'iOS',
+                    'LAC2',
                 ]
             })
 
@@ -63,9 +63,9 @@ module.exports = {
                 status: 400,
                 error: `No authType has been provided`,
                 pleaseProvideOneOfTheseTypes: [
-                    'eg1',
-                    'PC',
-                    'lac2',
+                    'EG1',
+                    'iOS',
+                    'LAC2',
                 ]
             })
 
@@ -82,9 +82,9 @@ module.exports = {
                     'authType'
                 ],
                 validAuthTypes: [
-                    'eg1',
-                    'PC',
-                    'lac2',
+                    'EG1',
+                    'iOS',
+                    'LAC2',
 
                 ]
             })
