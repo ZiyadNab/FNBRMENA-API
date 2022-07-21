@@ -13,7 +13,7 @@ admin.initializeApp({
 });
 
 const baseFile = 'Endpoints.js'
-const EndpointsBase = require(`./endpoints/${baseFile}`)
+const EndpointsBase = require(`./API/${baseFile}`)
 const Array = []
 const EndpointsData = []
 
@@ -34,7 +34,7 @@ const readEndpoints = (dir) => {
 }
 
 //excute
-readEndpoints('endpoints')
+readEndpoints('API')
 EndpointsBase.listen(app, admin)
 authEvent(admin)
 
