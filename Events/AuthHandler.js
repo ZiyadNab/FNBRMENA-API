@@ -11,12 +11,12 @@ module.exports = async (admin) => {
         const eg1AuthCredential = await eg1Doc.get()
     
         //chech if there is an expiration date
-        if(eg1AuthCredential.data().api !== undefined) if(eg1AuthCredential.data().api.tokenData !== undefined) var exchangeAuthExpires = eg1AuthCredential.data().api.tokenData.expires_at
-        else var exchangeAuthExpires = '2020-01-01T00:00:00.000Z'
+        if(eg1AuthCredential.data().api !== undefined) if(eg1AuthCredential.data().api.tokenData !== undefined) var eg1AuthExpires = eg1AuthCredential.data().api.tokenData.expires_at
+        else var eg1AuthExpires = '2020-01-01T00:00:00.000Z'
         
         //if push is set to true
         if(push){
-            var exchangeAuthExpires = '2020-01-01T00:00:00.000Z'
+            var eg1AuthExpires = '2020-01-01T00:00:00.000Z'
     
             //chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("EG1").update({
@@ -25,7 +25,7 @@ module.exports = async (admin) => {
         }
     
         //check if the token has been expired
-        if(moment(exchangeAuthExpires).diff(moment()) <= 0){
+        if(moment(eg1AuthExpires).diff(moment()) <= 0){
     
             //request header
             const header = {
@@ -78,12 +78,12 @@ module.exports = async (admin) => {
         const iOSAuthCredential = await iOSDoc.get()
     
         //chech if there is an expiration date
-        if(iOSAuthCredential.data().api !== undefined) if(iOSAuthCredential.data().api.tokenData !== undefined) var exchangeAuthExpires = iOSAuthCredential.data().api.tokenData.expires_at
-        else var exchangeAuthExpires = '2020-01-01T00:00:00.000Z'
+        if(iOSAuthCredential.data().api !== undefined) if(iOSAuthCredential.data().api.tokenData !== undefined) var iOSAuthExpires = iOSAuthCredential.data().api.tokenData.expires_at
+        else var iOSAuthExpires = '2020-01-01T00:00:00.000Z'
         
         //if push is set to true
         if(push){
-            var exchangeAuthExpires = '2020-01-01T00:00:00.000Z'
+            var iOSAuthExpires = '2020-01-01T00:00:00.000Z'
     
             //chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("iOS").update({
@@ -92,7 +92,7 @@ module.exports = async (admin) => {
         }
     
         //check if the token has been expired
-        if(moment(exchangeAuthExpires).diff(moment()) <= 0){
+        if(moment(iOSAuthExpires).diff(moment()) <= 0){
     
             //request header
             const header = {
@@ -144,12 +144,12 @@ module.exports = async (admin) => {
         const lac2AuthCredential = await lac2Doc.get()
     
         //chech if there is an expiration date
-        if(lac2AuthCredential.data().api !== undefined) if(lac2AuthCredential.data().api.tokenData !== undefined) var exchangeAuthExpires = lac2AuthCredential.data().api.tokenData.expires_at
-        else var exchangeAuthExpires = '2020-01-01T00:00:00.000Z'
+        if(lac2AuthCredential.data().api !== undefined) if(lac2AuthCredential.data().api.tokenData !== undefined) var lac2AuthExpires = lac2AuthCredential.data().api.tokenData.refresh_expires_at
+        else var lac2AuthExpires = '2020-01-01T00:00:00.000Z'
         
         //if push is set to true
         if(push){
-            var exchangeAuthExpires = '2020-01-01T00:00:00.000Z'
+            var lac2AuthExpires = '2020-01-01T00:00:00.000Z'
     
             //chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("lac2").update({
@@ -158,7 +158,7 @@ module.exports = async (admin) => {
         }
     
         //check if the refresh token is near to expire
-        if(moment(exchangeAuthExpires).diff(moment()) <= 0){
+        if(moment(lac2AuthExpires).diff(moment()) <= 0){
     
             //request header
             const header = {
