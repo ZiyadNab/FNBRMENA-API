@@ -4,36 +4,44 @@ const querystring = require('querystring')
 
 module.exports = async (admin) => {
 
+    // authVerifier
+    const verify = async (token) => {
+        return await axios.get('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/verify', {headers: {'Authorization': `bearer ${token}`}})
+        .then(async res => {
+            return res.status
+        }).catch(async err => {
+            return err.response.status
+        })
+    }
+
     //eg1 handler
     const eg1AuthCredentialHandler = async (deviceAuth, authTokens, push) => {
-
         const eg1Doc = authTokens.doc("eg1")
         const eg1AuthCredential = await eg1Doc.get()
-    
-        //chech if there is an expiration date
-        if(eg1AuthCredential.data().api !== undefined) if(eg1AuthCredential.data().api.tokenData !== undefined) var eg1AuthExpires = eg1AuthCredential.data().api.tokenData.expires_at
-        else var eg1AuthExpires = '2020-01-01T00:00:00.000Z'
         
-        //if push is set to true
+        // Verfiy the token
+        var tokenVerified = await verify(eg1AuthCredential.data().api.tokenData.access_token)
+        
+        // If push is enabled
         if(push){
-            var eg1AuthExpires = '2020-01-01T00:00:00.000Z'
+            tokenVerified = '401'
     
-            //chenge push status to false
+            // Chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("EG1").update({
                 Push: false
             })
         }
     
-        //check if the token has been expired
-        if(moment(eg1AuthExpires).diff(moment()) <= 0){
+        // Check if the token has been expired
+        if(tokenVerified !== 200){
     
-            //request header
+            // Request header
             const header = {
                 'Content-Type':'application/x-www-form-urlencoded',     
                 'Authorization': 'basic MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE='   
             }
     
-            //request data
+            // Request data
             const body = querystring.stringify({
                 'grant_type':'device_auth',
                 'token_type': 'eg1',
@@ -42,15 +50,15 @@ module.exports = async (admin) => {
                 'secret': deviceAuth.secret,
             })
     
-            //request access_token key
+            // Request access_token key
             axios.post("https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", body, { headers: header })
             .then(async res => {
     
-                //update the accessToken
+                // Update the accessToken
                 eg1Doc.update({
                     api: {
-                        status: 200,
-                        authType: 'EG1',
+                        status: res.status,
+                        authType: 'eg1',
                         lastModified: moment().format(),
                         tokenData: res.data
                     }
@@ -58,10 +66,10 @@ module.exports = async (admin) => {
     
             }).catch(async err => {
     
-                //add an error
+                // An error happened
                 eg1Doc.update({
                     api: {
-                        status: 500,
+                        status: err.response.status,
                         authType: 'eg1',
                         lastModified: moment().format(),
                         errorData: err.response.data
@@ -71,36 +79,34 @@ module.exports = async (admin) => {
         }
     }
 
-    //ios handler
+    //iOS handler
     const iOSAuthCredentialHandler = async (deviceAuth, authTokens, push) => {
-
         const iOSDoc = authTokens.doc("ios")
         const iOSAuthCredential = await iOSDoc.get()
-    
-        //chech if there is an expiration date
-        if(iOSAuthCredential.data().api !== undefined) if(iOSAuthCredential.data().api.tokenData !== undefined) var iOSAuthExpires = iOSAuthCredential.data().api.tokenData.expires_at
-        else var iOSAuthExpires = '2020-01-01T00:00:00.000Z'
+
+        // Verfiy the token
+        var tokenVerified = await verify(iOSAuthCredential.data().api.tokenData.access_token)
         
-        //if push is set to true
+        // If push is enabled
         if(push){
-            var iOSAuthExpires = '2020-01-01T00:00:00.000Z'
+            tokenVerified = '401'
     
-            //chenge push status to false
+            // Chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("iOS").update({
                 Push: false
             })
         }
     
-        //check if the token has been expired
-        if(moment(iOSAuthExpires).diff(moment()) <= 0){
+        // Check if the token has been expired
+        if(tokenVerified !== 200){
     
-            //request header
+            // Request header
             const header = {
                 'Content-Type':'application/x-www-form-urlencoded',     
                 'Authorization': 'basic MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE='   
             }
     
-            //request data
+            // Request data
             const body = querystring.stringify({
                 'grant_type':'device_auth',
                 'account_id': deviceAuth.account_id,
@@ -108,14 +114,14 @@ module.exports = async (admin) => {
                 'secret': deviceAuth.secret,
             })
     
-            //request access_token key
-            axios.post("https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", body, { headers: header })
+            // Request access_token key
+            await axios.post("https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", body, { headers: header })
             .then(async res => {
     
-                //update the accessToken
+                // Update the accessToken
                 iOSDoc.update({
                     api: {
-                        status: 200,
+                        status: res.status,
                         authType: 'iOS',
                         lastModified: moment().format(),
                         tokenData: res.data
@@ -124,11 +130,11 @@ module.exports = async (admin) => {
     
             }).catch(async err => {
     
-                //add an error
+                // An error happened
                 iOSDoc.update({
                     api: {
-                        status: 500,
-                        authType: 'eg1',
+                        status: err.response.status,
+                        authType: 'iOS',
                         lastModified: moment().format(),
                         errorData: err.response.data
                     }
@@ -230,5 +236,5 @@ module.exports = async (admin) => {
             if(lac2Status) await lac2AuthCredentialHandler(authTokens, lac2Push)
         })
     }
-    setInterval(Auth, 1 * 10000)
+    setInterval(Auth, 1 * 15000)
 }
