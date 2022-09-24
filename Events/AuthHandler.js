@@ -19,17 +19,26 @@ module.exports = async (admin) => {
         const eg1Doc = authTokens.doc("eg1")
         const eg1AuthCredential = await eg1Doc.get()
         
-        // Verfiy the token
-        var tokenVerified = await verify(eg1AuthCredential.data().api.tokenData.access_token)
-        
         // If push is enabled
         if(push){
-            tokenVerified = '401'
+            var tokenVerified = '401'
     
             // Chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("EG1").update({
                 Push: false
             })
+        } else {
+
+            // Catching db errors
+            try {
+
+                // Verfiy the token
+                var tokenVerified = await verify(eg1AuthCredential.data().api.tokenData.access_token)
+            } catch {
+
+                // Set tokenVerified to 401
+                var tokenVerified = '401'
+            }
         }
     
         // Check if the token has been expired
@@ -83,9 +92,6 @@ module.exports = async (admin) => {
     const iOSAuthCredentialHandler = async (deviceAuth, authTokens, push) => {
         const iOSDoc = authTokens.doc("ios")
         const iOSAuthCredential = await iOSDoc.get()
-
-        // Verfiy the token
-        var tokenVerified = await verify(iOSAuthCredential.data().api.tokenData.access_token)
         
         // If push is enabled
         if(push){
@@ -95,6 +101,18 @@ module.exports = async (admin) => {
             await admin.database().ref("API").child("Endpoints").child("Auth").child("iOS").update({
                 Push: false
             })
+        } else {
+
+            // Catching db errors
+            try {
+
+                 // Verfiy the token
+                var tokenVerified = await verify(iOSAuthCredential.data().api.tokenData.access_token)
+            } catch {
+
+                // Set tokenVerified to 401
+                var tokenVerified = '401'
+            }
         }
     
         // Check if the token has been expired
@@ -236,5 +254,5 @@ module.exports = async (admin) => {
             if(lac2Status) await lac2AuthCredentialHandler(authTokens, lac2Push)
         })
     }
-    setInterval(Auth, 1 * 15000)
+    setInterval(Auth, 1 * 20000)
 }
