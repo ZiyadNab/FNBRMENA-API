@@ -1,43 +1,89 @@
-const serviceAccount = require('./Firebase/ServiceAccount.json')
-const authEvent = require('./Events/AuthHandler.js')
-const admin = require('firebase-admin')
 const express = require('express')
-const fs = require('fs')
-const path = require('path')
 const app = express()
+const admin = require('firebase-admin')
+const bp = require('body-parser')
+app.use(bp.json())
+app.use(bp.urlencoded({ extended: true }))
+require('dotenv').config()
+const cors = require("cors")
+app.use(cors())
 
 //Get access to the database
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(require('./Firebase/ServiceAccount.json')),
     databaseURL: "https://fnbrmena-api-default-rtdb.europe-west1.firebasedatabase.app/"
-});
+})
 
-const baseFile = 'Endpoints.js'
-const EndpointsBase = require(`./API/${baseFile}`)
-const Array = []
-const EndpointsData = []
+function Auth (req, res, next) {
+    
+    if (!req.headers.authorization) {
+        return res.status(401).json({
+            result: false,
+            error: 'Missing authorization header.' 
+        })
+    } 
 
-//read all commands
-const readEndpoints = (dir) => {
-    const files = fs.readdirSync(path.join(__dirname, dir))
-    for (const file of files) {
-        const stat = fs.lstatSync(path.join(__dirname, dir, file))
-        if (stat.isDirectory()) {
-            readEndpoints(path.join(dir, file))
-        } else if (file !== baseFile) {
-            const option = require(path.join(__dirname, dir, file))
-            Array.push(option.endpoints)
-            EndpointsData.push(option)
-            EndpointsBase(option)
-        }
+    else if (req.headers.authorization !== '1Q') {
+        return res.status(401).json({
+            result: false,
+            error: 'Api key is invalid.' 
+        })
     }
+
+    else next()
 }
 
-//excute
-readEndpoints('API')
-EndpointsBase.listen(app, admin)
-authEvent(admin)
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: false }))
+app.use(express.static(__dirname + '/views'))
+app.use(express.json())
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log('FNBRMENA Api is online!')
+// Watch
+app.use(`/api/v1/watch`, require(`./routes/watch_routes/watch.js`)(admin))
+
+// Discovery tab
+app.use(`/api/v1/fortnite/discovery`, require(`./routes/discoveryTab.js`)(admin))
+
+// Downloader
+app.use(`/api/v1/dl`, require(`./routes/dl.js`)(admin))
+app.get('/downloadd',(req, res) => {
+    res.render(__dirname + '/views/index.ejs')
+})
+
+// Account lookups
+app.use(`/api/v1/fortnite/lookup`, require(`./routes/accountLookup.js`)(admin))
+
+// Code redeem
+app.use(`/api/v1/fortnite/codeverify`, require(`./routes/codeRedeem.js`)(admin))
+app.get('/codechecker',(req, res) => {
+    res.render(__dirname + '/views/codeRedeem.ejs')
+})
+
+// Player stats
+app.use(`/api/v1/fortnite/stats`, require(`./routes/fortniteStats.js`)(admin))
+
+// Player ranked stats
+app.use(`/api/v1/fortnite/ranked/stats`, require(`./routes/rankedStats.js`)(admin))
+
+// Shop sections
+app.use(`/api/v1/fortnite/sections`, require(`./routes/shopSection.js`)(admin))
+
+// Auth endpoint
+app.use(`/api/auth`, require(`./routes/Auth.js`)(admin))
+
+// Redirects endpoint
+app.use(`/redirect`, require(`./routes/Redirects.js`)(admin))
+
+// Media endpoint
+app.use(`/api/media`, require(`./routes/Media.js`)(admin))
+
+// Streams endpoint
+app.use(`/api/stream`, require(`./routes/Streams.js`)(admin))
+
+// Events
+require('./Events/Auth.js')(admin)
+require('./Events/playerBase.js')(admin)
+
+const listener = app.listen(8080, () => {
+    console.log(`API is running on port ${listener.address().port}`)
 })
