@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="div" class="w-75 p-3">
+
+        <!-- Alerts -->
+        <div class="alert alert-danger mb-3" role="alert" id="alert" style="display: none;">
+            A simple danger alert—check it out!
+        </div>
+
+        <!-- Input Link -->
+        <div class="input-group mb-3">
+            <input type="text" style="height:75px" class="form-control" id="url" placeholder="URL" aria-label="URL" aria-describedby="basic-addon1">
+        </div>
+
+        <button type="button" id="fetch" class="btn btn-outline-primary mb-3 w-100 btn-lg" disabled style="height:75px;">Fetch</button>
+        <a href="" id="mp4" download style="display: none;">
+            <button type="button" href="" id="mp4" download class="btn btn-primary mb-3 w-100 btn-lg">Download MP4</button>
+        </a>
+        <a href="" id="mp3" download style="display: none;">
+            <button type="button" href="" id="mp3" download class="btn btn-success mb-3 w-100 btn-lg">Download MP3</button>
+        </a>
+    </div>
+</body>
+
+<script type="module">
+
+    // Get elements by their id
+    const inputUrl = document.getElementById('url')
+    const fetchButton = document.getElementById('fetch')
+
+    // Handling Error Alerts
+    function alertError(msg, type){
+        document.getElementById('alert').style = ''
+        document.getElementById('alert').innerText = msg
+        if(type === "danger") document.getElementById('alert').className = 'alert alert-danger mb-3'
+        if(type === "warning") document.getElementById('alert').className = 'alert alert-warning mb-3'
+        if(type === "success") document.getElementById('alert').className = 'alert alert-success mb-3'
+        if(type === "hide") document.getElementById('alert').style = 'display: none;'
+    }
+
+    // Fetching the url
+    function fetchFunction(){
+        axios.get(`https://fnbrmena.com/api/v1/dl?url=${inputUrl.value}`) 
+        .then(async res => {
+
+            if(res.data.result){
+
+                // Hide fetch button
+                document.getElementById('fetch').style = 'display: none;'
+
+                // View download buttons
+                console.log(res.data.data.videoUrl)
+                document.getElementById('mp4').href = res.data.data.videoUrl
+                document.getElementById('mp4').style = 'height:75px'
+                if(res.data.data.audioUrl){
+                    document.getElementById('mp3').href = res.data.data.audioUrl
+                    document.getElementById('mp3').style = 'height:75px'
+                }else {
+                    document.getElementById('mp3').style = 'height:75px'
+                    document.getElementById('mp3').disabled = true
+                }
+
+            }
+
+        }).catch(err => {
+            console.log(err.response)
+            alertError(err.response.data.error, 'danger')
+        })
+    }
+
+    // Submit
+    fetchButton.addEventListener("click", fetchFunction)
+
+    // Input
+    url.addEventListener("input", () => {
+        let urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+        if(!urlRegex.test(inputUrl.value)) alertError('Enter a valid url input.', 'danger')
+        else {
+
+            alertError(null, 'hide')
+            document.getElementById('fetch').disabled = false
+        }
+        
+    
+    })
+
+  </script>
+</html>

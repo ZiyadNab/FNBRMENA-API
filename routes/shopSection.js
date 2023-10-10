@@ -11,7 +11,8 @@ module.exports = (admin) => {
         const token = await axios.get(`http://localhost:8080/api/auth/get/ios`)
 
         // Request epic's calendar
-        axios.get(`https://api.nitestats.com/v1/epic/modes-smart`)
+        axios.get(`https://fortnite-public-service-prod11.ol.epicgames.com/fortnite/api/calendar/v1/timeline`,
+        { headers: { 'Authorization': `${token.data.data.token_type} ${token.data.data.access_token}` }})
         .then(async calendar => {
 
             // Loop through all section events
