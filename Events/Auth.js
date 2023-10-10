@@ -151,59 +151,65 @@ module.exports = async (admin) => {
 
     // LAC2 handler
     const lac2AuthCredentialHandler = async (authTokens, push) => {
+        const LAC2Doc = authTokens.doc("lac2")
+        const LAC2AuthCredential = await LAC2Doc.get()
 
-        const lac2Doc = authTokens.doc("lac2")
-        const lac2AuthCredential = await lac2Doc.get()
-
-        //chech if there is an expiration date
-        if (lac2AuthCredential.data() !== undefined) if (lac2AuthCredential.data().tokenData !== undefined) var lac2AuthExpires = lac2AuthCredential.data().tokenData.refresh_expires_at
-        else var lac2AuthExpires = '2020-01-01T00:00:00.000Z'
-
-        //if push is set to true
+        // If push is enabled
         if (push) {
-            var lac2AuthExpires = '2020-01-01T00:00:00.000Z'
+            tokenVerified = '401'
 
-            //chenge push status to false
+            // Chenge push status to false
             await admin.database().ref("API").child("Endpoints").child("Auth").child("lac2").update({
                 Push: false
             })
+        } else {
+
+            // Catching db errors
+            try {
+
+                // Verfiy the token
+                var tokenVerified = await verify(LAC2AuthCredential.data().tokenData.access_token)
+            } catch {
+
+                // Set tokenVerified to 401
+                var tokenVerified = '401'
+            }
         }
 
-        //check if the refresh token is near to expire
-        if (moment(lac2AuthExpires).diff(moment()) <= 0) {
+        // Check if the token has been expired
+        if (tokenVerified !== 200) {
 
-            //request header
+            // Request header
             const header = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': 'basic MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y='
             }
 
-            //request data
+            // Request data
             const body = querystring.stringify({
-                'grant_type': 'refresh_token',
-                'refresh_token': lac2AuthCredential.data().tokenData.refresh_token,
+                'grant_type': 'client_credentials',
             })
 
-            //request access_token key
-            axios.post("https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", body, { headers: header })
-                .then(async res => {
+            // Request access_token key
+            await axios.post("https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", body, { headers: header })
+            .then(async res => {
 
-                    //update the accessToken
-                    lac2Doc.set({
-                        authType: 'LAC2',
-                        lastModified: moment().format(),
-                        tokenData: res.data
-                    })
-
-                }).catch(async err => {
-
-                    //add an error
-                    lac2Doc.set({
-                        authType: 'LAC2',
-                        lastModified: moment().format(),
-                        errorData: err.response.data
-                    })
+                // Update the accessToken
+                LAC2Doc.set({
+                    authType: 'LAC2',
+                    lastModified: moment().format(),
+                    tokenData: res.data
                 })
+
+            }).catch(async err => {
+
+                // An error happened
+                LAC2Doc.set({
+                    authType: 'LAC2',
+                    lastModified: moment().format(),
+                    errorData: err.response.data
+                })
+            })
         }
     }
 
