@@ -5,8 +5,7 @@ const bp = require('body-parser')
 app.use(bp.json())
 app.use(bp.urlencoded({ extended: true }))
 require('dotenv').config()
-const cors = require("cors")
-app.use(cors())
+const fs = require('fs')
 
 //Get access to the database
 admin.initializeApp({
@@ -38,26 +37,17 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.static(__dirname + '/views'))
 app.use(express.json())
 
-// Watch
-app.use(`/api/v1/watch`, require(`./routes/watch_routes/watch.js`)(admin))
-
 // Discovery tab
 app.use(`/api/v1/fortnite/discovery`, require(`./routes/discoveryTab.js`)(admin))
 
 // Downloader
 app.use(`/api/v1/dl`, require(`./routes/dl.js`)(admin))
-app.get('/downloadd',(req, res) => {
+app.get('/download',(req, res) => {
     res.render(__dirname + '/views/index.ejs')
 })
 
 // Account lookups
 app.use(`/api/v1/fortnite/lookup`, require(`./routes/accountLookup.js`)(admin))
-
-// Code redeem
-app.use(`/api/v1/fortnite/codeverify`, require(`./routes/codeRedeem.js`)(admin))
-app.get('/codechecker',(req, res) => {
-    res.render(__dirname + '/views/codeRedeem.ejs')
-})
 
 // Player stats
 app.use(`/api/v1/fortnite/stats`, require(`./routes/fortniteStats.js`)(admin))
