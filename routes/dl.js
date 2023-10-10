@@ -53,7 +53,6 @@ module.exports = (admin) => {
                         id: tres.data.data.id,
                         title: tres.data.data.title,
                         date: new Date(tres.data.data.create_time),
-<<<<<<< HEAD
                         stats: {
                             playCount: tres.data.data.play_count,
                             commentsCount: tres.data.data.comment_count,
@@ -66,29 +65,6 @@ module.exports = (admin) => {
                             url: domain + tres.data.data.play,
                             duration: tres.data.data.duration
                         },
-=======
-                        stats: [
-                            {
-                                type: "Views",
-                                value: tres.data.data.play_count
-                            },
-                            {
-                                type: "Comments",
-                                value: tres.data.data.comment_count
-                            },
-                            {
-                                type: "Likes",
-                                value: tres.data.data.collect_count
-                            },
-                        ],
-                        coverImg: domain + tres.data.data.cover,
-                        video: tres.data.data.images ? null : [
-                            {
-                                url: domain + tres.data.data.play,
-                                duration: tres.data.data.duration
-                            }
-                        ],
->>>>>>> parent of 7603a2b (Revert "A")
                         images: tres.data.data.images ? tres.data.data.images : [],
                         audio: {
                             title: tres.data.data.music_info.title,
@@ -170,7 +146,6 @@ module.exports = (admin) => {
                             id: xresData.rest_id,
                             title: xresData.legacy.full_text,
                             date: new Date(xresData.legacy.created_at),
-<<<<<<< HEAD
                             stats: {
                                 viewsCount: xresData.views.count,
                                 commentsCount: xresData.legacy.reply_count,
@@ -178,23 +153,6 @@ module.exports = (admin) => {
                                 bookmarkCount: xresData.legacy.bookmark_count,
                                 likesCount: xresData.legacy.favorite_count,
                             },
-=======
-                            stats: [
-                                {
-                                    type: "Views",
-                                    value: xresData.views.count
-                                },
-                                {
-                                    type: "Comments",
-                                    value: xresData.legacy.reply_count
-                                },
-                                {
-                                    type: "Likes",
-                                    value: xresData.legacy.favorite_count
-                                },
-                            ],
-                            coverImg: null,
->>>>>>> parent of 7603a2b (Revert "A")
                             video: xresData.legacy.extended_entities.media.filter(z => z.type.includes("video") || z.type.includes("animated_gif")).length !== 0 ? xresData.legacy.extended_entities.media.filter(z => z.type.includes("video") || z.type.includes("animated_gif")).map(e => {
                                 if (e.type === "video" || e.type === "animated_gif") return {
                                     qualities: e.video_info.variants.filter(z => z.content_type.includes("video")).map(p => {
@@ -251,28 +209,11 @@ module.exports = (admin) => {
                             id: iresData.id,
                             title: iresData.edge_media_to_caption.edges[0].node.text,
                             date: new Date(iresData.taken_at_timestamp),
-<<<<<<< HEAD
                             stats: {
                                 viewsCount: iresData.video_view_count,
                                 commentsCount: iresData.edge_media_to_parent_comment.count,
                                 likesCount: iresData.edge_media_preview_like.count,
                             },
-=======
-                            stats: [
-                                {
-                                    type: "Views",
-                                    value: iresData.video_view_count
-                                },
-                                {
-                                    type: "Comments",
-                                    value: iresData.edge_media_to_parent_comment.count
-                                },
-                                {
-                                    type: "Likes",
-                                    value: iresData.edge_media_preview_like.count
-                                }
-                            ],
->>>>>>> parent of 7603a2b (Revert "A")
                             coverImg: iresData.thumbnail_src,
                             video: [
                                 {
